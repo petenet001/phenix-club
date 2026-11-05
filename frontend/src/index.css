@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition duration-150 ease-out active:scale-[.97] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100; }
+  .btn-primary { @apply btn bg-phenix-500 text-white hover:bg-phenix-600; }
+  .btn-secondary { @apply btn bg-white text-slate-700 border border-slate-300 hover:bg-slate-50; }
+  .btn-danger { @apply btn bg-red-600 text-white hover:bg-red-700; }
+  .btn-ghost { @apply btn text-slate-600 hover:bg-slate-100; }
+  .input { @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm transition duration-150 focus:border-phenix-500 focus:outline-none focus:ring-2 focus:ring-phenix-100; }
+  .label { @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500; }
+  .card { @apply rounded-xl bg-white p-5 border border-slate-200 transition-colors duration-200; }
+  .card-hover { @apply transition-colors duration-200 hover:border-slate-300; }
+  tbody tr { @apply transition-colors duration-150; }
+  .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+}
+
+/* Cartes d'une même grille : entrée en cascade */
+.grid > .animate-fade-up:nth-child(2) { animation-delay: 50ms; }
+.grid > .animate-fade-up:nth-child(3) { animation-delay: 100ms; }
+.grid > .animate-fade-up:nth-child(4) { animation-delay: 150ms; }
+.grid > .animate-fade-up:nth-child(5) { animation-delay: 200ms; }
+.grid > .animate-fade-up:nth-child(6) { animation-delay: 250ms; }
+.grid > .animate-fade-up:nth-child(n+7) { animation-delay: 300ms; }
+
+/* Respect du réglage système « réduire les animations » */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+@media print {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  @page { size: A5 portrait; margin: 10mm; }
+  /* Une seule page : le contenu masqué de l'application garderait sinon sa hauteur. */
+  html, body { height: 100%; overflow: hidden; background: #fff; }
+  body * { visibility: hidden; }
+  .receipt-print, .receipt-print * { visibility: visible; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .receipt-print { position: fixed; top: 0; left: 0; width: 100%; max-width: none; border: 0; box-shadow: none; }
+}

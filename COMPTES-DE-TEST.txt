@@ -1,0 +1,100 @@
+PHENIX CLUB MANAGER - COMPTES DE TEST ET DEMARRAGE
+====================================================
+Etat au 05/11/2026 (base locale phenix_club). Comptes de demonstration uniquement :
+a ne jamais utiliser en production.
+
+
+1. DEMARRER LES SERVEURS
+------------------------
+
+Prerequis : PostgreSQL demarre (brew services start postgresql@18 si besoin).
+
+Terminal 1 - API Laravel :
+    cd ~/Projects/web/phenix/backend
+    php artisan serve                      # http://localhost:8000 (web + simulateur iOS)
+    php artisan serve --host 0.0.0.0       # a la place, pour tester sur un vrai telephone (meme Wi-Fi)
+
+Terminal 2 - Application web (bureau) :
+    cd ~/Projects/web/phenix/frontend
+    npm run dev                            # http://localhost:5173
+
+Terminal 3 - Application mobile (Flutter) :
+    cd ~/Projects/web/phenix/mobile
+    flutter run                            # simulateur iOS (API sur localhost:8000)
+    flutter run --dart-define=API_URL=http://192.168.79.178:8000/api
+                                           # vrai telephone : remplacer par l'IP actuelle du Mac
+                                           # (obtenue avec : ipconfig getifaddr en0)
+
+Verification rapide :
+    curl http://localhost:8000/up          # doit repondre 200
+
+
+2. APPLICATION WEB (BUREAU) - http://localhost:5173
+---------------------------------------------------
+
+Mot de passe commun : password
+
+  Role      Email                    Ce qu'il voit
+  --------  -----------------------  ---------------------------------------------------------
+  Gerant    gerant@phenixclub.cg     Tout : tableau de bord, parametres, annulations, export caisse
+  Accueil   accueil@phenixclub.cg    Pointage + borne, adherents, paiements, retards, absences, caisse
+  Coach     coach@phenixclub.cg      Pointage, adherents, absences, programmes
+
+Pour tester :
+  - Borne de pointage : page Pointage > "Ouvrir la borne de pointage" (gerant ou accueil),
+    puis scanner le QR avec l'application mobile.
+  - Code d'acces mobile d'un adherent : fiche adherent > carte "Application mobile"
+    > "Activer l'acces" ou "Nouveau code" (code a 6 chiffres affiche une seule fois).
+  - Encaissement et recu : fiche adherent > "Encaisser" (le recu s'ouvre ensuite).
+
+
+3. APPLICATION MOBILE (ADHERENTS)
+---------------------------------
+
+Connexion : numero de telephone (sous n'importe quel format : 061000004, +242061000004...)
+            + code d'acces.
+
+  Telephone   Code    Adherent           Cas a tester
+  ----------  ------  -----------------  ----------------------------------------------------
+  061000001   123456  Alain Mbemba       Actif, mensuel en cours, programme du coach
+                                         (lun/mer/ven) : RAPPELS DE SEANCE
+  061000004   123456  Prisca Samba       Actif, trimestriel avec reste du (15 000 FCFA),
+                                         frais d'inscription dus : page Paiements
+  061000009   123456  Rodrigue Malonga   Actif, renouvellement deja paye (abonnement a venir)
+  061000008   123456  Nadege Kouka       Actif, mensuel en cours
+  061000002   123456  Clarisse Ngoma     Abonnement expire recemment (tolerance de pointage)
+  061000003   123456  Dieudonne Okemba   Inactif, en retard de paiement : acces refuse
+  061000007   123456  Steve Goma         Adhesion en attente de validation : acces refuse
+  061000011   123456  Grace Nkouka       Demande d'adhesion en ligne, en attente
+  066000000   123456  Phijem Moungala    Actif, a une photo de profil (avatar)
+  061000006   123456  Mireille Itoua     Carte 10 seances
+  061000010   123456  Chantal Bouanga    Actif, paiement annule puis ressaisi
+
+A tester dans l'application :
+  - Pointer : bouton central > scanner le QR de la borne (vrai telephone, camera requise).
+    Une seule presence par jour ; le QR change toutes les 30 secondes.
+  - Paiements : "A regler", historique, recu detaille.
+  - Presences : calendrier du mois.
+  - Profil : carte de membre (QR personnel), rappels de seance (+ rappel test),
+    theme Auto / Clair / Sombre, changement du code d'acces, deconnexion.
+
+
+4. REMETTRE LES DONNEES DE DEMONSTRATION A ZERO
+-----------------------------------------------
+
+ATTENTION : efface toute la base locale (y compris les adherents, paiements et pointages
+saisis pendant vos tests) et recree les comptes ci-dessus avec le code 123456.
+
+    cd ~/Projects/web/phenix/backend
+    php artisan migrate:fresh --seed
+
+Les dates de demonstration sont relatives au jour du remplissage : refaire cette commande
+apres quelques jours pour retrouver les cas de retard, de tolerance et d'absence.
+
+
+5. LANCER LES TESTS AUTOMATIQUES
+--------------------------------
+
+    cd ~/Projects/web/phenix/backend  && php artisan test          # API (Pest)
+    cd ~/Projects/web/phenix/frontend && npm test                  # web (Vitest)
+    cd ~/Projects/web/phenix/mobile   && flutter analyze && flutter test
